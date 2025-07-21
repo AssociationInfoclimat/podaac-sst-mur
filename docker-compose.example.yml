@@ -1,0 +1,12 @@
+services:
+    podaac_sst_mur:
+        build: .
+        container_name: podaac_sst_mur
+        volumes:
+            - ./data:/media/datastore
+        environment:
+            DB_HOST: 127.0.0.1
+            DB_USER: user
+            DB_PASSWORD: password
+            CLIENT_ID: client_id
+            CLIENT_PASSWORD: client_password
