@@ -3,6 +3,9 @@ name: CI/CD - Build & Push Docker Image
 on:
   push:
     branches: [main, develop]
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
     paths:
       - 'src/**'
       - 'Dockerfile'
@@ -21,7 +24,7 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/'))
     permissions:
       contents: read
       packages: write
@@ -47,12 +50,16 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
             type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-,event=branch
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
           labels: |
             org.opencontainers.image.title=PODAAC SST MUR Processor
             org.opencontainers.image.description=Docker image for processing PODAAC SST MUR data
+            org.opencontainers.image.version=${{ github.ref_name }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
