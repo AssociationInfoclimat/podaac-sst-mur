@@ -13,4 +13,4 @@ RUN apt-get update && \
 
 COPY ./src /app
 
-CMD ["sleep", "infinity"]
+CMD ["php", "/app/main.php"]
